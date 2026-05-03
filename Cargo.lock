@@ -1218,8 +1218,7 @@ dependencies = [
 [[package]]
 name = "jpreprocess"
 version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bddbf8bec2aaead10fb4dbfcf80da1bf72159182460b2cf64e0712b066158e06"
+source = "git+https://github.com/jpreprocess/jpreprocess.git#d6ad5e484a2040e8c23d1403dcecf34f1fc24536"
 dependencies = [
  "jlabel",
  "jpreprocess-core",
@@ -1235,12 +1234,12 @@ dependencies = [
 [[package]]
 name = "jpreprocess-core"
 version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "946d356486ff2cab183d2a65323f13ae3fd35e4467abfd3ad47cb0574f5a877b"
+source = "git+https://github.com/jpreprocess/jpreprocess.git#d6ad5e484a2040e8c23d1403dcecf34f1fc24536"
 dependencies = [
  "aho-corasick",
  "bincode",
  "lindera",
+ "lindera-dictionary",
  "once_cell",
  "regex",
  "serde",
@@ -1250,8 +1249,7 @@ dependencies = [
 [[package]]
 name = "jpreprocess-dictionary"
 version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c12c6f47b7bbdbcbd395e752280a042d33c63b03f6812451c2947078f5d03c85"
+source = "git+https://github.com/jpreprocess/jpreprocess.git#d6ad5e484a2040e8c23d1403dcecf34f1fc24536"
 dependencies = [
  "anyhow",
  "bincode",
@@ -1274,8 +1272,7 @@ dependencies = [
 [[package]]
 name = "jpreprocess-jpcommon"
 version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45c730e16e8a68f668b6dc9b3067b3cb6c8fcec1e9b59c06042bf817a1f1382e"
+source = "git+https://github.com/jpreprocess/jpreprocess.git#d6ad5e484a2040e8c23d1403dcecf34f1fc24536"
 dependencies = [
  "jlabel",
  "jpreprocess-core",
@@ -1285,8 +1282,7 @@ dependencies = [
 [[package]]
 name = "jpreprocess-naist-jdic"
 version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "298e61acfc4a4af326ad3d64f50046381567bf19e9e6cba3c5f0bd0ca1cdc135"
+source = "git+https://github.com/jpreprocess/jpreprocess.git#d6ad5e484a2040e8c23d1403dcecf34f1fc24536"
 dependencies = [
  "bincode",
  "flate2",
@@ -1303,12 +1299,10 @@ dependencies = [
 [[package]]
 name = "jpreprocess-njd"
 version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "930c7a3a9db7fa039bdf805d840edfd4cc7726a9d4b3019e1d4813f85da421b1"
+source = "git+https://github.com/jpreprocess/jpreprocess.git#d6ad5e484a2040e8c23d1403dcecf34f1fc24536"
 dependencies = [
  "aho-corasick",
  "jpreprocess-core",
- "jpreprocess-dictionary",
  "jpreprocess-window",
  "phf",
 ]
@@ -1316,8 +1310,7 @@ dependencies = [
 [[package]]
 name = "jpreprocess-window"
 version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6b4ddedb285eba4c9221eaf3e9e189eae1a3c33c660c844291d6e8a0afe1693"
+source = "git+https://github.com/jpreprocess/jpreprocess.git#d6ad5e484a2040e8c23d1403dcecf34f1fc24536"
 
 [[package]]
 name = "js-sys"
