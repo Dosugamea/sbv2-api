@@ -273,7 +273,15 @@ const { createApp, ref, computed, onMounted } = Vue;
 createApp({
   setup() {
     // --- リアクティブな状態 ---
-    const apiBase = ref(localStorage.getItem('sbv2_api_base') || 'http://localhost:3000');
+    // URLパラメータ → localStorage → デフォルト値 の優先順位でAPIベースURLを決定
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlApiBase = urlParams.get('api_base');
+    const initialApiBase = urlApiBase || localStorage.getItem('sbv2_api_base') || 'http://localhost:3000';
+    const apiBase = ref(initialApiBase);
+    // URLパラメータで指定された場合はlocalStorageにも保存
+    if (urlApiBase) {
+      localStorage.setItem('sbv2_api_base', urlApiBase);
+    }
     const models = ref([]);
     const loadingModels = ref(false);
 
