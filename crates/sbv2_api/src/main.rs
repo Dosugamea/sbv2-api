@@ -11,6 +11,7 @@ use std::env;
 use std::sync::Arc;
 use tokio::fs;
 use tokio::sync::Mutex;
+use tower_http::cors::{AllowOrigin, CorsLayer};
 use utoipa::{OpenApi, ToSchema};
 use utoipa_scalar::{Scalar, Servable};
 
@@ -192,12 +193,36 @@ impl AppState {
 async fn main() -> anyhow::Result<()> {
     dotenvy::dotenv_override().ok();
     env_logger::init();
+
+    // CORS設定: .env の ALLOW_ORIGIN から許可するオリジンを読み込む
+    // 未設定の場合は全オリジンを許可
+    let cors = {
+        let origin = env::var("ALLOW_ORIGIN")
+            .ok()
+            .filter(|s| !s.is_empty());
+        if let Some(origin) = origin {
+            match origin.as_str() {
+                "*" => CorsLayer::new().allow_origin(AllowOrigin::any()),
+                _ => {
+                    let origins: Vec<_> = origin
+                        .split(',')
+                        .map(|s| s.trim().parse().unwrap())
+                        .collect();
+                    CorsLayer::new().allow_origin(AllowOrigin::list(origins))
+                }
+            }
+        } else {
+            CorsLayer::new().allow_origin(AllowOrigin::any())
+        }
+    };
+
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/synthesize", post(synthesize))
         .route("/models", get(models))
         .with_state(AppState::new().await?)
-        .merge(Scalar::with_url("/docs", ApiDoc::openapi()));
+        .merge(Scalar::with_url("/docs", ApiDoc::openapi()))
+        .layer(cors);
     let addr = env::var("ADDR").unwrap_or("0.0.0.0:3000".to_string());
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     log::info!("Listening on {addr}");
