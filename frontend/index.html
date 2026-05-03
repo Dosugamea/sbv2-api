@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBV2 TTS プレイグラウンド</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Hiragino Sans', Meiryo, system-ui, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { text-align: center; font-size: 0.85rem; color: #888; margin-bottom: 24px; }
+
+  .card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #aaa;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 0.8rem;
+    color: #999;
+    margin-bottom: 4px;
+  }
+  label .param-name { font-weight: 600; color: #ccc; }
+
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+  select { cursor: pointer; }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #ffd200;
+    box-shadow: 0 0 0 2px rgba(255,210,0,0.2);
+  }
+  select option { background: #1a1a2e; color: #e0e0e0; }
+
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .range-row input[type="range"] { flex: 1; }
+  .range-row input[type="number"] { width: 80px; text-align: center; }
+  .range-val { font-size: 0.85rem; color: #ffd200; min-width: 45px; text-align: right; font-weight: 600; }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.15);
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #ffd200;
+    cursor: pointer;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary {
+    background: linear-gradient(135deg, #ffd200, #f7971e);
+    color: #1a1a2e;
+  }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(249,151,30,0.4); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.1);
+    color: #e0e0e0;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.2); }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; border-radius: 6px; }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  .audio-section { margin-top: 16px; }
+  audio { width: 100%; margin-top: 8px; border-radius: 8px; }
+  .download-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #ffd200;
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+  .download-link:hover { text-decoration: underline; }
+
+  .status {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-top: 12px;
+  }
+  .status-info  { background: rgba(0,150,255,0.15); color: #4db8ff; }
+  .status-error { background: rgba(255,50,50,0.15); color: #ff5555; }
+  .status-ok    { background: rgba(0,200,100,0.15); color: #4dff88; }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .api-url-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .api-url-row input { flex: 1; }
+
+  .inline-flex { display: flex; align-items: center; gap: 8px; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .text-muted { color: #888; font-size: 0.75rem; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="container">
+    <h1>🎙️ SBV2 TTS プレイグラウンド</h1>
+    <p class="subtitle">Style-Bert-VITS2 音声合成をもっとカジュアルに</p>
+
+    <!-- API設定 -->
+    <div class="card">
+      <div class="card-title">⚙️ API設定</div>
+      <div class="api-url-row">
+        <input type="text" v-model="apiBase" placeholder="http://localhost:3000" style="flex:1">
+        <button class="btn btn-secondary btn-sm" @click="fetchModels" :disabled="loadingModels">
+          <span v-if="loadingModels" class="loading-spinner"></span>
+          {{ loadingModels ? '取得中...' : 'モデル再取得' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- 音声合成パラメータ -->
+    <div class="card">
+      <div class="card-title">🎛️ 合成パラメータ</div>
+
+      <!-- 話者選択 -->
+      <div class="form-group">
+        <label><span class="param-name">話者 / モデル</span> (ident)</label>
+        <select v-model="ident">
+          <option value="" disabled>-- 話者を選択 --</option>
+          <option v-for="m in models" :key="m" :value="m">{{ m }}</option>
+        </select>
+      </div>
+
+      <!-- テキスト -->
+      <div class="form-group">
+        <label><span class="param-name">テキスト</span> (text)</label>
+        <textarea v-model="text" placeholder="ここに読み上げたい文章を入力してね..."></textarea>
+      </div>
+
+      <!-- SDP Ratio -->
+      <div class="form-group">
+        <label><span class="param-name">SDP比</span> (sdp_ratio) — 発声タイミングゆらぎ。0に近いと安定、1に近いとバラつくが生成不安定化（デフォ: 0.0）</label>
+        <div class="range-row">
+          <input type="range" v-model.number="sdpRatio" min="0" max="1" step="0.01">
+          <span class="range-val">{{ sdpRatio.toFixed(2) }}</span>
+          <input type="number" v-model.number="sdpRatio" min="0" max="1" step="0.01">
+        </div>
+      </div>
+
+      <!-- Length Scale (話速) -->
+      <div class="form-group">
+        <label><span class="param-name">話速</span> (length_scale) — 小さい=速い / 大きい=遅い</label>
+        <div class="range-row">
+          <input type="range" v-model.number="lengthScale" min="0.1" max="3" step="0.05">
+          <span class="range-val">{{ lengthScale.toFixed(2) }}</span>
+          <input type="number" v-model.number="lengthScale" min="0.1" max="10" step="0.05">
+        </div>
+      </div>
+
+      <!-- Style ID -->
+      <div class="form-group">
+        <label><span class="param-name">スタイルID</span> (style_id) — 話者内のスタイル番号</label>
+        <input type="number" v-model.number="styleId" min="0" step="1">
+      </div>
+
+      <!-- Speaker ID -->
+      <div class="form-group">
+        <label><span class="param-name">話者ID</span> (speaker_id) — マルチ話者モデルの場合</label>
+        <input type="number" v-model.number="speakerId" min="0" step="1">
+      </div>
+
+      <!-- ボタン -->
+      <div class="btn-row">
+        <button class="btn btn-primary" @click="synthesize" :disabled="!canSynthesize || loadingSynthesize">
+          <span v-if="loadingSynthesize" class="loading-spinner"></span>
+          {{ loadingSynthesize ? '生成中...' : '🔊 音声を生成' }}
+        </button>
+        <button class="btn btn-secondary" @click="downloadWav" :disabled="!audioUrl">
+          💾 ダウンロード (WAV)
+        </button>
+      </div>
+
+      <!-- ステータス -->
+      <div v-if="statusMsg" class="status" :class="statusClass">{{ statusMsg }}</div>
+    </div>
+
+    <!-- プレビュー -->
+    <div class="card" v-if="audioUrl">
+      <div class="card-title">🔊 プレビュー</div>
+      <audio :src="audioUrl" controls></audio>
+      <a class="download-link" :href="audioUrl" :download="downloadFileName">💾 {{ downloadFileName }} をダウンロード</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+createApp({
+  setup() {
+    // --- リアクティブな状態 ---
+    const apiBase = ref(localStorage.getItem('sbv2_api_base') || 'http://localhost:3000');
+    const models = ref([]);
+    const loadingModels = ref(false);
+
+    // 合成パラメータ
+    const ident = ref('');
+    const text = ref('');
+    const sdpRatio = ref(0.0);
+    const lengthScale = ref(1.0);
+    const styleId = ref(0);
+    const speakerId = ref(0);
+
+    // 合成結果
+    const loadingSynthesize = ref(false);
+    const audioUrl = ref(null);
+    const audioBlob = ref(null);
+    const statusMsg = ref('');
+    const statusClass = ref('');
+
+    // --- 計算プロパティ ---
+    const canSynthesize = computed(() => ident.value && text.value.trim());
+    const downloadFileName = computed(() => {
+      if (!ident.value) return 'output.wav';
+      const t = text.value.trim().slice(0, 30).replace(/[\\/:*?"<>|]/g, '');
+      return `${ident.value}_${t || 'no-text'}.wav`;
+    });
+
+    // APIベースURL変更時に保存
+    const saveApiBase = () => {
+      localStorage.setItem('sbv2_api_base', apiBase.value);
+    };
+
+    // --- メソッド ---
+    const setStatus = (msg, cls) => {
+      statusMsg.value = msg;
+      statusClass.value = cls;
+      if (cls === 'status-ok') setTimeout(() => { statusMsg.value = ''; }, 5000);
+    };
+
+    const fetchModels = async () => {
+      loadingModels.value = true;
+      setStatus('モデル一覧を取得中...', 'status-info');
+      try {
+        const res = await fetch(`${apiBase.value}/models`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        models.value = await res.json();
+        saveApiBase();
+        setStatus(`${models.value.length} 件のモデルを取得したよ！`, 'status-ok');
+      } catch (e) {
+        setStatus(`モデル取得失敗: ${e.message}`, 'status-error');
+        models.value = [];
+      } finally {
+        loadingModels.value = false;
+      }
+    };
+
+    const synthesize = async () => {
+      loadingSynthesize.value = true;
+      setStatus('音声合成中...', 'status-info');
+      // 前回のURLを解放
+      if (audioUrl.value) URL.revokeObjectURL(audioUrl.value);
+      audioUrl.value = null;
+      audioBlob.value = null;
+
+      try {
+        const res = await fetch(`${apiBase.value}/synthesize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: text.value,
+            ident: ident.value,
+            sdp_ratio: sdpRatio.value,
+            length_scale: lengthScale.value,
+            style_id: styleId.value,
+            speaker_id: speakerId.value,
+          }),
+        });
+        saveApiBase();
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
+        }
+
+        audioBlob.value = await res.blob();
+        audioUrl.value = URL.createObjectURL(audioBlob.value);
+        setStatus('音声生成完了！プレビューで聴いてみてね 🎉', 'status-ok');
+      } catch (e) {
+        setStatus(`合成失敗: ${e.message}`, 'status-error');
+      } finally {
+        loadingSynthesize.value = false;
+      }
+    };
+
+    const downloadWav = () => {
+      if (!audioUrl.value) return;
+      const a = document.createElement('a');
+      a.href = audioUrl.value;
+      a.download = downloadFileName.value;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    // --- マウント時 ---
+    onMounted(() => fetchModels());
+
+    return {
+      apiBase,
+      models,
+      loadingModels,
+      ident,
+      text,
+      sdpRatio,
+      lengthScale,
+      styleId,
+      speakerId,
+      loadingSynthesize,
+      audioUrl,
+      audioBlob,
+      statusMsg,
+      statusClass,
+      canSynthesize,
+      downloadFileName,
+      fetchModels,
+      synthesize,
+      downloadWav,
+    };
+  }
+}).mount('#app');
+</script>
+
+</body>
+</html>
