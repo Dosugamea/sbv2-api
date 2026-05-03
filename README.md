@@ -1,18 +1,25 @@
 # SBV2-API
 
 > [!CAUTION]
+> 本リポジトリは[neodyland/sbv2-api](https://github.com/neodyland/sbv2-api)を個人的に変更したフォークです。
+
+以下、フォーク元のREADME
+
+---
+
+> [!CAUTION]
 > 本バージョンはアルファ版です。
-> 
+>
 > 安定版を利用したい場合は[こちら](https://github.com/neodyland/sbv2-api/tree/v0.1.x)をご覧ください。
 
 > [!CAUTION]
 > オプションの辞書はLGPLです。
-> 
+>
 > オプションの辞書を使用する場合、バイナリの内部の辞書部分について、LGPLが適用されます。
 
 > [!NOTE]
 > このレポジトリはメンテナンスの都合上、[tuna2134](https:://github.com/tuna2134)氏の所属する[Neodyland](https://neody.land/)へとリポジトリ所在地を移動しました。
-> 
+>
 > 引き続きtuna2134氏がメインメンテナとして管理しています。
 
 ## プログラミングに詳しくない方向け
@@ -72,6 +79,7 @@ cp .env.sample .env
 ### 起動
 
 CPUの場合は
+
 ```sh
 docker run -it --rm -p 3000:3000 --name sbv2 \
 -v ./models:/work/models --env-file .env \
@@ -87,14 +95,17 @@ ADDR=0.0.0.0:3000
 ```
 
 CPUの場合は
+
 ```bash
 docker run --platform linux/amd64 -it --rm -p 3000:3000 --name sbv2 \
 -v ./models:/work/models --env-file .env \
 ghcr.io/neodyland/sbv2-api:cpu
 ```
+
 </details>
 
 CUDAの場合は
+
 ```sh
 docker run -it --rm -p 3000:3000 --name sbv2 \
 -v ./models:/work/models --env-file .env \
@@ -114,6 +125,7 @@ curl http://localhost:3000/models
 ### Feature flags
 
 `sbv2_api`、`sbv2_core`共に
+
 - `cuda` featureでcuda
 - `cuda_tf32` featureでcudaのtf32機能
 - `tensorrt` featureでbert部分のtensorrt利用
